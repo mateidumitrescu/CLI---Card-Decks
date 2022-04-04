@@ -13,6 +13,9 @@ dll_list_t *create_card_list(int data_size);
 //function to check if a card is valid or not
 int is_valid_card(int number, char symbol[S_MAX]);
 
+//function to free a list of cards data
+void free_card_list(dll_list_t **card_list);
+
 //function to count the number of arguments
 int count_arguments(char arguments[ARG]);
 
@@ -23,11 +26,10 @@ void add_card_in_list(dll_list_t *card_list, void* data);
 void add_deck_in_list(dll_list_t *deck_list, void *data);
 
 //function to start ADD_DECK command
-void start_add_deck(int data_size_card_list, card_t *card_info,
-					dll_list_t *deck_list);
+void start_add_deck(int data_size_card_list, dll_list_t *deck_list);
 
 //function to free all malloc'd data
-void free_all(dll_list_t **deck_list, card_t *card_info);
+void free_all(dll_list_t **deck_list);
 
 //function to show all decks
 void show_all(dll_list_t *deck_list);

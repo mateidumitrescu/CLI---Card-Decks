@@ -14,16 +14,16 @@ int main(void) {
 	int magic = 1;
 	int data_size_deck_list = sizeof(dll_list_t);
 	int data_size_card_list = sizeof(card_t);
-	card_t *card_info = malloc(sizeof(*card_info));
+	
 	dll_list_t *deck_list = create_deck_list(data_size_deck_list);
 
 	while (magic) {
 		scanf("%s", command);
 		if (strcmp(command, "EXIT") == 0) {
-			free_all(&deck_list, card_info);
+			free_all(&deck_list);
 			magic = 0;
 		} else if (strcmp(command, "ADD_DECK") == 0) {
-			start_add_deck(data_size_card_list, card_info, deck_list);
+			start_add_deck(data_size_card_list, deck_list);
 		} else if (strcmp(command, "SHOW_ALL") == 0) {
 			show_all(deck_list);
 		} else if (strcmp(command, "SHOW_DECK") == 0) {

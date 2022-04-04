@@ -44,6 +44,17 @@ int is_valid_card(int number, char symbol[S_MAX]) {
 	return 0;
 }
 
+void free_card_list(dll_list_t **card_list) {
+	dll_node_t *current_card = (*card_list)->head;
+	while (current_card != NULL) {
+		dll_node_t *aux = current_card->next;
+		free(current_card->data);
+		free(current_card);
+		current_card = aux;
+	}
+	free(*card_list);
+}
+
 int count_arguments(char arguments[ARG]) {
 	char *p = strtok(arguments, " ");
 	int count = 0;
@@ -106,67 +117,54 @@ void add_deck_in_list(dll_list_t *deck_list, void *data) {
 	deck_list->size++;
 }
 
-void start_add_deck(int data_size_card_list, card_t *card_info,
-					dll_list_t *deck_list) {
-	char arguments[ARG];
+void start_add_deck(int data_size_card_list, dll_list_t *deck_list) {
 	int number_of_cards;
-	fgets(arguments, ARG, stdin);
-	if (count_arguments(arguments) == 1) {
-		dll_list_t *card_list = create_card_list(data_size_card_list);
-		int n = 0;
-		number_of_cards = atoi(arguments);
-		while (n < number_of_cards) {
-			fgets(arguments, ARG, stdin);
-			char copy_arguments[ARG];
-			strcpy(copy_arguments, arguments);
-			if (count_arguments(arguments) == 2) {
-				char *p = strtok(copy_arguments, " ");
-				card_info->number = atoi(p);
-				p = strtok(NULL, " ");
-				strcpy(card_info->symbol, p);
-				int len = strlen(card_info->symbol);
-				card_info->symbol[len - 1] = '\0';
-				int valid = is_valid_card(card_info->number, card_info->symbol);
-				if (valid == 1) {
-					add_card_in_list(card_list, card_info);
-				} else {
-					n--;
-					//no incrementation so we could add n cards in deck
-				}
-				n++;
-			} else {
-				printf("Invalid command. Please try again.\n");
-			}
-		}
-		add_deck_in_list(deck_list, card_list);
-		printf("The deck was successfully created with %d cards.\n", number_of_cards);
-	} else {
+	scanf("%d", &number_of_cards);
+	char buffer[ARG];
+	fgets(buffer, ARG, stdin);
+	if (strlen(buffer) > 1) {
 		printf("Invalid command. Please try again.\n");
+		return;
 	}
+	card_t *card_info = malloc(sizeof(*card_info));
+	int count = 0;
+	dll_list_t *card_list = create_card_list(data_size_card_list);
+	while (count < number_of_cards) {
+		scanf("%d", &card_info->number);
+		scanf("%s", card_info->symbol);
+		fgets(buffer, ARG, stdin);
+		if (strlen(buffer) > 1) {
+			count--;
+			printf("Invalid command. Please try again.\n");
+			//no incrementation so we could add number_of_cards cards in list
+		} else if (is_valid_card(card_info->number, card_info->symbol)) {
+			add_card_in_list(card_list, card_info);
+		} else {
+			count--;
+		}
+		count++;
+	}
+	free(card_info);
+	add_deck_in_list(deck_list, card_list);
+	free(card_list);//auxiliar
+	printf("The deck was successfully created with %d cards.\n", number_of_cards);
 }
 
 //CHECK FREES !!!!!!!!!!!!!!!!!!!!!!!!
-void free_all(dll_list_t **deck_list, card_t *card_info) {
-	free(card_info);
+void free_all(dll_list_t **deck_list) {
 
-	if ((*deck_list)->size == 0)
+	if ((*deck_list)->size == 0) {
+		free(*deck_list);
 		return;
-	
+	}
+
 	dll_node_t *current_deck = (*deck_list)->head;
 	int count = 0;
 	while (count < (*deck_list)->size) {
 		dll_list_t *card_list = (dll_list_t *)(current_deck->data);
-		dll_node_t *current_card = card_list->head;
-		int count_cards = 0;
-		while (count_cards < card_list->size) {
-			dll_node_t *aux = current_card->next;
-			free(current_card->data);
-			free(current_card);
-			current_card = aux;
-			count_cards++;
-		}
 		dll_node_t *aux = current_deck->next;
-		free(current_deck->data);
+		free_card_list(&card_list);
+
 		free(current_deck);
 		current_deck = aux;
 		count++;
@@ -281,18 +279,42 @@ void delete_deck(dll_list_t *deck_list) {
 		current_deck = current_deck->next;
 		index--;
 	}
+	dll_list_t *card_list = (dll_list_t *)current_deck->data;
+
+	if (current_deck == deck_list->head && deck_list->size == 1) {//special case
+		free_card_list(&card_list);
+		deck_list->size--;
+		
+		free(current_deck);
+		deck_list->head = NULL;
+		printf("The deck %d was successfully deleted.\n", copy_index);
+		return;
+	} else if (current_deck == deck_list->head) {
+		free_card_list(&card_list);
+		deck_list->size--;
+		deck_list->head = current_deck->next;
+		deck_list->head->prev = NULL;
+		
+		free(current_deck);
+		printf("The deck %d was successfully deleted.\n", copy_index);
+		return;
+	}
+
+	if (current_deck->next == NULL) {//reached end of list
+		free_card_list(&card_list);//free card list first
+		deck_list->size--;
+		current_deck->prev->next = NULL;
+		
+		free(current_deck);
+		printf("The deck %d was successfully deleted.\n", copy_index);
+		return;
+	}
+
+	//general case for deleting a deck inside the deck list
 	current_deck->prev->next = current_deck->next;
 	current_deck->next->prev = current_deck->prev;//deck is now out of list
-	//free deck data
-	dll_list_t *card_list = (dll_list_t *)current_deck->data;
-	dll_node_t *current_card = card_list->head;
-	while (current_card != NULL) {//free card list first
-		dll_node_t *aux = current_card->next;
-		free(current_card->data);
-		free(current_card);
-		current_card = aux;
-	}
-	free(current_deck->data);
+	free_card_list(&card_list);
+	
 	free(current_deck);
 	deck_list->size--;
 	printf("The deck %d was successfully deleted.\n", copy_index);
