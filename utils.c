@@ -320,4 +320,314 @@ void delete_deck(dll_list_t *deck_list) {
 	printf("The deck %d was successfully deleted.\n", copy_index);
 }
 
+void delete_card(dll_list_t *deck_list) {
+	int index_deck, index_card;
+	scanf("%d%d", &index_deck, &index_card);
+	char buffer[ARG];
+	fgets(buffer, ARG, stdin);
+	if (strlen(buffer) > 1) {
+		printf("Invalid command. Please try again.\n");
+		return;
+	}
 
+	if (index_deck >= deck_list->size || index_deck < 0) {
+		printf("The provided index is out of bounds for the deck list.\n");
+		return;
+	}
+	int copy_index_deck;
+	copy_index_deck = index_deck;
+
+	dll_node_t *current_deck = deck_list->head;
+	while (index_deck > 0) {
+		current_deck = current_deck->next;
+		index_deck--;
+	}
+	dll_list_t *card_list = (dll_list_t *)current_deck->data;
+	if (index_card >= card_list->size || index_card < 0) {
+		printf("The provided index is out of bounds for deck %d.\n", copy_index_deck);
+		return;
+	}
+	dll_node_t *current_card = card_list->head;
+	while (index_card > 0) {
+		current_card = current_card->next;
+		index_card--;
+	}
+
+	if (current_card == card_list->head && card_list->size == 1) {
+		// special case for only one card in list
+		// deck must be deleted
+		free_card_list(&card_list);
+		deck_list->size--;
+		if (deck_list->size == 0) {
+			deck_list->head = NULL;
+		} else if (current_deck->next == NULL) {
+			current_deck->prev->next = NULL;
+		} else {
+			current_deck->prev->next = current_deck->next;
+			current_deck->next->prev = current_deck->prev;
+		}
+		free(current_deck);
+		printf("The card was successfully deleted from deck %d.\n", copy_index_deck);
+		return;
+	}
+
+	if (current_card == card_list->head) {// special case for index 0
+		card_list->size--;
+		card_list->head = current_card->next;
+		card_list->head->prev = NULL;
+		free(current_card->data);
+		free(current_card);
+		printf("The card was successfully deleted from deck %d.\n", copy_index_deck);
+		return;
+	}
+
+	if (current_card->next == NULL) {
+		//special case for last card in deck
+		card_list->size--;
+		current_card->prev->next = NULL;
+		free(current_card->data);
+		free(current_card);
+		printf("The card was successfully deleted from deck %d.\n", copy_index_deck);
+		return;
+	}
+
+	// general case for a card deleted inside the list
+	card_list->size--;
+	current_card->prev->next = current_card->next;
+	current_card->next->prev = current_card->prev;
+	free(current_card->data);
+	free(current_card);
+	printf("The card was successfully deleted from deck %d.\n", copy_index_deck);
+}
+
+void start_adding_cards(dll_list_t *card_list, int number_of_cards) {
+	int index = 0;
+	char buffer[ARG];
+	card_t *info = malloc(sizeof(*info));
+	while (index < number_of_cards) {
+		scanf("%d%s", &info->number, info->symbol);
+		fgets(buffer, ARG, stdin);
+		if (strlen(buffer) > 1) {
+			index--;
+			printf("Invalid command. Please try again.\n");
+			//no incrementation so we could add number_of_cards cards in list
+		} else if (is_valid_card(info->number, info->symbol)) {
+			add_card_in_list(card_list, info);
+		} else {
+			index--;
+		}
+		index++;
+	}
+}
+
+void add_cards(dll_list_t *deck_list) {
+	int index_deck, number_of_cards;
+	scanf("%d%d", &index_deck, &number_of_cards);
+	char buffer[ARG];
+	fgets(buffer, ARG, stdin);
+	if (strlen(buffer) > 1) {
+		printf("Invalid command. Please try again.\n");
+		return;
+	}
+	if (index_deck < 0 || index_deck >= deck_list->size) {
+		printf("The provided index is out of bounds for the deck list.\n");
+		return;
+	}
+	int copy_index = index_deck;
+	dll_node_t *current_deck = deck_list->head;
+	while (index_deck > 0) {
+		current_deck = current_deck->next;
+		index_deck--;
+	}
+	dll_list_t *card_list = (dll_list_t *)current_deck->data;
+	// adding cards in deck starts here
+	start_adding_cards(card_list, number_of_cards);
+	
+	printf("The cards were successfully added to deck %d.\n", copy_index);
+}
+
+void print_deck_number(dll_list_t *deck_list) {
+	char buffer[ARG];
+	fgets(buffer, ARG, stdin);
+	if (strlen(buffer) > 1) {
+		printf("Invalid command. Please try again.\n");
+		return;
+	}
+	printf("The number of decks is %d.\n", deck_list->size);
+}
+
+void print_len_deck(dll_list_t *deck_list) {
+	int index;
+	char buffer[ARG];
+	scanf("%d", &index);
+	fgets(buffer, ARG, stdin);
+	if (strlen(buffer) > 1) {
+		printf("Invalid command. Please try again.\n");
+		return;
+	}
+	if (index >= deck_list->size || index < 0) {
+		printf("The provided index is out of bounds for the deck list.\n");
+		return;
+	}
+	int copy_index = index;
+	dll_node_t *current_deck = deck_list->head;
+	while (index > 0) {
+		current_deck = current_deck->next;
+		index--;
+	}
+	// we reached the deck we want to get the length of
+	dll_list_t *card_list = (dll_list_t *)current_deck->data;
+	printf("The length of deck %d is %d.\n", copy_index, card_list->size);
+}
+
+void end_point_first(dll_list_t *card_list) {
+	dll_node_t *prev = NULL;
+	dll_node_t *current_card = card_list->head;
+	while (current_card != NULL) {
+		prev = current_card;
+		current_card = current_card->next;
+	}
+	prev->next = card_list->head;
+	card_list->head->prev = prev;
+}
+
+void start_shuffle(dll_list_t *card_list) {
+	if (card_list->size == 1)
+		return;
+	int middle = card_list->size / 2;
+	end_point_first(card_list);
+	int index = 0;
+	dll_node_t *current_card = card_list->head;
+	while (index < middle) {
+		current_card = current_card->next;
+		index++;
+	}
+	dll_node_t *prev = current_card->prev;
+	current_card->prev = NULL;
+	card_list->head = current_card;
+	prev->next = NULL;
+}
+
+void shuffle_deck(dll_list_t *deck_list) {
+	int index;
+	char buffer[ARG];
+	scanf("%d", &index);
+	fgets(buffer, ARG, stdin);
+	if (strlen(buffer) > 1) {
+		printf("Invalid command. Please try again.\n");
+		return;
+	}
+	if (index >= deck_list->size || index < 0) {
+		printf("The provided index is out of bounds for the deck list.\n");
+		return;
+	}
+	int copy_index = index;
+	dll_node_t *current_deck = deck_list->head;
+	while (index > 0) {
+		current_deck = current_deck->next;
+		index--;
+	}
+	//reached deck that we want to shuffle
+	dll_list_t *card_list = (dll_list_t *)current_deck->data;
+	start_shuffle(card_list);
+	printf("The deck %d was successfully shuffled.\n", copy_index);
+}
+
+dll_list_t *reach_deck(dll_list_t *deck_list, int index) {
+	dll_node_t *current_deck = deck_list->head;
+	while (index > 0) {
+		current_deck = current_deck->next;
+		index--;
+	}
+	dll_list_t *card_list = (dll_list_t *)current_deck->data;
+	return card_list;
+}
+
+void del_index_deck(dll_list_t *deck_list, int index) {
+	dll_node_t *current_deck = deck_list->head;
+	while (index > 0) {
+		current_deck = current_deck->next;
+		index--;
+	}
+	dll_list_t *card_list = (dll_list_t *)current_deck->data;
+
+	if (current_deck == deck_list->head && deck_list->size == 1) {//special case
+		free_card_list(&card_list);
+		deck_list->size--;
+		
+		free(current_deck);
+		deck_list->head = NULL;
+		return;
+	} else if (current_deck == deck_list->head) {
+		free_card_list(&card_list);
+		deck_list->size--;
+		deck_list->head = current_deck->next;
+		deck_list->head->prev = NULL;
+		
+		free(current_deck);
+		return;
+	}
+
+	if (current_deck->next == NULL) {//reached end of list
+		free_card_list(&card_list);//free card list first
+		deck_list->size--;
+		current_deck->prev->next = NULL;
+		
+		free(current_deck);
+		return;
+	}
+
+	//general case for deleting a deck inside the deck list
+	current_deck->prev->next = current_deck->next;
+	current_deck->next->prev = current_deck->prev;//deck is now out of list
+	free_card_list(&card_list);
+	
+	free(current_deck);
+	deck_list->size--;
+}
+
+void merge_decks(dll_list_t *deck_list) {
+	int index1, index2;
+	scanf("%d%d", &index1, &index2);
+	char buffer[ARG];
+	fgets(buffer, ARG, stdin);
+	if (strlen(buffer) > 1) {
+		printf("Invalid command. Please try again.\n");
+		return;
+	}
+	if (index1 >= deck_list->size || index1 < 0 ||
+		index2 >= deck_list->size || index2 < 0) {
+		printf("The provided index is out of bounds for the deck list.\n");
+		return;
+	}
+	// new list starts here
+	dll_list_t *card_list_1 = reach_deck(deck_list, index1);
+	dll_list_t *card_list_2 = reach_deck(deck_list, index2);
+	// we have the 2 lists that we want to merge
+	dll_list_t *new_list = create_card_list(card_list_2->data_size);
+	dll_node_t *current_card_1 = card_list_1->head;
+	dll_node_t *current_card_2 = card_list_2->head;
+
+	while (current_card_1 != NULL && current_card_2 != NULL) {
+		add_card_in_list(new_list, current_card_1->data);
+		add_card_in_list(new_list, current_card_2->data);
+		current_card_1 = current_card_1->next;
+		current_card_2 = current_card_2->next;
+	}
+	
+
+	while (current_card_2 != NULL) {
+		add_card_in_list(new_list, current_card_2->data);
+		current_card_2 = current_card_2->next;
+	}
+	while (current_card_1 != NULL) {
+		add_card_in_list(new_list, current_card_1->data);
+		current_card_1 = current_card_1->next;
+	}
+
+	add_deck_in_list(deck_list, new_list);// new list added
+	free(new_list);// auxiliar
+	del_index_deck(deck_list, index1);
+	del_index_deck(deck_list, index2);
+	printf("The deck %d and the deck %d were successfully merged.\n", index1, index2);
+}

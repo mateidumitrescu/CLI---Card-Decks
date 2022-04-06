@@ -32,6 +32,18 @@ int main(void) {
 			reverse_deck(deck_list);
 		} else if (strcmp(command, "DEL_DECK") == 0) {
 			delete_deck(deck_list);
+		} else if (strcmp(command, "DEL_CARD") == 0) {
+			delete_card(deck_list);
+		} else if (strcmp(command, "ADD_CARDS") == 0) {
+			add_cards(deck_list);
+		} else if (strcmp(command, "DECK_NUMBER") == 0) {
+			print_deck_number(deck_list);
+		} else if (strcmp(command, "DECK_LEN") == 0) {
+			print_len_deck(deck_list);
+		} else if (strcmp(command, "SHUFFLE_DECK") == 0) {
+			shuffle_deck(deck_list);
+		} else if (strcmp(command, "MERGE_DECKS") == 0) {
+			merge_decks(deck_list);
 		}
 	}
 
