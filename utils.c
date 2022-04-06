@@ -627,7 +627,83 @@ void merge_decks(dll_list_t *deck_list) {
 
 	add_deck_in_list(deck_list, new_list);// new list added
 	free(new_list);// auxiliar
-	del_index_deck(deck_list, index1);
-	del_index_deck(deck_list, index2);
+	if (index1 > index2) {
+		del_index_deck(deck_list, index1);
+		del_index_deck(deck_list, index2);
+	} else {
+		del_index_deck(deck_list, index2);
+		del_index_deck(deck_list, index1);
+	}
+	
 	printf("The deck %d and the deck %d were successfully merged.\n", index1, index2);
+}
+
+void insert_deck(dll_list_t *deck_list, dll_list_t *list, int index) {
+	dll_node_t *new_deck = malloc(sizeof(*new_deck));
+	new_deck->data = malloc(deck_list->data_size);
+	memcpy(new_deck->data, list, deck_list->data_size);
+
+	dll_node_t *current_deck = deck_list->head;
+	while (index > 0) {
+		current_deck = current_deck->next;
+		index--;
+	}
+	if (current_deck->next == NULL) {// we reached end of deck list
+		current_deck->next = new_deck;
+		new_deck->prev = current_deck;
+		new_deck->next = NULL;
+		return;
+	}
+	// general case for inserting a deck
+	new_deck->next = current_deck->next;
+	current_deck->next = new_deck;
+	new_deck->prev = current_deck;
+	new_deck->next->prev = new_deck;
+}
+
+void split_deck(dll_list_t *deck_list) {
+	int index_deck;
+	int index_split;
+	scanf("%d%d", &index_deck, &index_split);
+	char buffer[ARG];
+	fgets(buffer, ARG, stdin);
+	if (strlen(buffer) > 1) {
+		printf("Invalid command. Please try again.\n");
+		return;
+	}
+	if (index_deck < 0 || index_deck >= deck_list->size) {
+		printf("The provided index is out of bounds for the deck list.\n");
+		return;
+	}
+	dll_list_t *card_list = reach_deck(deck_list, index_deck);
+	if (index_split >= card_list->size || index_split < 0) {
+		printf("The provided index is out of bounds for deck %d.\n", index_deck);
+		return;
+	}
+	
+	if (index_split == 0) {
+		printf("The deck %d was successfully split by index %d.\n", index_deck, index_split);
+		return;
+	}
+	int copy_index = index_split;
+	dll_list_t *second_list = create_card_list(card_list->data_size);
+	dll_node_t *prev = NULL;
+	dll_node_t *current_card = card_list->head;
+	while (copy_index > 0) {
+		prev = current_card;
+		current_card = current_card->next;
+		copy_index--;
+	}
+	int count = 0;
+	
+	while (current_card != NULL) {
+		add_card_in_list(second_list, current_card->data);
+		count++;
+		current_card = current_card->next;
+	}// we have the second list created, we have to insert it in deck list
+	prev->next = NULL;
+	card_list->size -= count;// new size for initial card list
+	insert_deck(deck_list, second_list, index_deck);
+	free(second_list);// auxiliar
+	printf("The deck %d was successfully split by index %d.\n", index_deck, index_split);
 }

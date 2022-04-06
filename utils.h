@@ -76,4 +76,10 @@ void del_index_deck(dll_list_t *deck_list, int index);
 //function to merge 2 decks
 void merge_decks(dll_list_t *deck_list);
 
+//function to insert a deck on an index pos
+void insert_deck(dll_list_t *deck_list, dll_list_t *list, int index);
+
+//function to split a deck
+void split_deck(dll_list_t *deck_list);
+
 #endif
