@@ -46,6 +46,8 @@ int main(void) {
 			merge_decks(deck_list);
 		} else if (strcmp(command, "SPLIT_DECK") == 0) {
 			split_deck(deck_list);
+		} else if (strcmp(command, "SORT_DECK") == 0) {
+			sort_deck(deck_list);	
 		} else {
 			printf("Invalid command. Please try again.\n");
 		}

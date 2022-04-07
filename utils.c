@@ -418,6 +418,7 @@ void start_adding_cards(dll_list_t *card_list, int number_of_cards) {
 		}
 		index++;
 	}
+	free(info);
 }
 
 void add_cards(dll_list_t *deck_list) {
@@ -652,6 +653,7 @@ void insert_deck(dll_list_t *deck_list, dll_list_t *list, int index) {
 		current_deck->next = new_deck;
 		new_deck->prev = current_deck;
 		new_deck->next = NULL;
+		deck_list->size++;
 		return;
 	}
 	// general case for inserting a deck
@@ -659,6 +661,7 @@ void insert_deck(dll_list_t *deck_list, dll_list_t *list, int index) {
 	current_deck->next = new_deck;
 	new_deck->prev = current_deck;
 	new_deck->next->prev = new_deck;
+	deck_list->size++;
 }
 
 void split_deck(dll_list_t *deck_list) {
@@ -706,4 +709,70 @@ void split_deck(dll_list_t *deck_list) {
 	insert_deck(deck_list, second_list, index_deck);
 	free(second_list);// auxiliar
 	printf("The deck %d was successfully split by index %d.\n", index_deck, index_split);
+}
+
+void compare_cards(dll_node_t *current_card, dll_node_t *compare_card) {
+	card_t *info_1 = (card_t *)current_card->data;
+	card_t *info_2 = (card_t *)compare_card->data;
+	if (info_1->number == info_2->number && strcmp(info_1->symbol, info_2->symbol) == 0) {
+		return;
+	}
+	if (info_1->number > info_2->number) {
+		card_t *aux = current_card->data;
+		current_card->data = compare_card->data;
+		compare_card->data = aux;
+	} else if (info_1->number == info_2->number) {
+		if (strcmp(info_2->symbol, "HEART") == 0 && strcmp(info_1->symbol, "CLUB") == 0) {
+			card_t *aux = current_card->data;
+			current_card->data = compare_card->data;
+			compare_card->data = aux;
+		} else if (strcmp(info_2->symbol, "SPADE") == 0 && strcmp(info_1->symbol, "CLUB") == 0) {
+			card_t *aux = current_card->data;
+			current_card->data = compare_card->data;
+			compare_card->data = aux;
+		} else if (strcmp(info_2->symbol, "DIAMOND") == 0 && strcmp(info_1->symbol, "CLUB") == 0) {
+			card_t *aux = current_card->data;
+			current_card->data = compare_card->data;
+			compare_card->data = aux;
+		} else if (strcmp(info_2->symbol, "HEART") == 0 && strcmp(info_1->symbol, "DIAMOND") == 0) {
+			card_t *aux = current_card->data;
+			current_card->data = compare_card->data;
+			compare_card->data = aux;
+		} else if (strcmp(info_2->symbol, "SPADE") == 0 && strcmp(info_1->symbol, "DIAMOND") == 0) {
+			card_t *aux = current_card->data;
+			current_card->data = compare_card->data;
+			compare_card->data = aux;
+		} else if (strcmp(info_2->symbol, "HEART") == 0 && strcmp(info_1->symbol, "SPADE") == 0) {
+			card_t *aux = current_card->data;
+			current_card->data = compare_card->data;
+			compare_card->data = aux;
+		}
+	}
+}
+
+void sort_deck(dll_list_t *deck_list) {
+	int index;
+	scanf("%d", &index);
+	char buffer[ARG];
+	fgets(buffer, ARG, stdin);
+	if (strlen(buffer) > 1) {
+		printf("Invalid command. Please try again.\n");
+		return;
+	}
+	if (index >= deck_list->size || index < 0) {
+		printf("The provided index is out of bounds for the deck list.\n");
+		return;
+	}
+	dll_list_t *card_list = reach_deck(deck_list, index);
+	dll_node_t *current_card = card_list->head;
+	dll_node_t *compare_card;
+	for (int i = 0; i < card_list->size; i++) {
+		compare_card = current_card;
+		for (int j = i + 1; j < card_list->size; j++) {
+			compare_card = compare_card->next;
+			compare_cards(current_card, compare_card);
+		}
+		current_card = current_card->next;
+	}
+	printf("The deck %d was successfully sorted.\n", index);
 }

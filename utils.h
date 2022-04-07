@@ -82,4 +82,10 @@ void insert_deck(dll_list_t *deck_list, dll_list_t *list, int index);
 //function to split a deck
 void split_deck(dll_list_t *deck_list);
 
+//function to swap 2 cards data in orders
+void compare_cards(dll_node_t *current_card, dll_node_t *compare_card);
+
+//function to sort cards in a deck
+void sort_deck(dll_list_t *deck_list);
+
 #endif
