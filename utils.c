@@ -700,9 +700,12 @@ void split_deck(dll_list_t *deck_list) {
 	int count = 0;
 	
 	while (current_card != NULL) {
+		dll_node_t *aux = current_card->next;
 		add_card_in_list(second_list, current_card->data);
+		free(current_card->data);
+		free(current_card);//we have to free old data
 		count++;
-		current_card = current_card->next;
+		current_card = aux;
 	}// we have the second list created, we have to insert it in deck list
 	prev->next = NULL;
 	card_list->size -= count;// new size for initial card list
