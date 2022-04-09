@@ -7,7 +7,6 @@
 
 #define ARG 56
 
-
 dll_list_t *create_deck_list(int data_size) {
 
 	dll_list_t *deck_list = malloc(sizeof(*deck_list));
@@ -180,6 +179,14 @@ void free_all(dll_list_t **deck_list) {
 void show_all(dll_list_t *deck_list) {
 	if (deck_list->size == 0)
 		return;
+
+	char buffer[256];
+	fgets(buffer, 256, stdin);
+
+	if (strlen(buffer) > 1) {
+		printf("Invalid command. Please try again.\n");
+		return;
+	}
 
 	dll_node_t *current_deck = deck_list->head;
 	int index = 0;
@@ -367,9 +374,15 @@ void delete_card(dll_list_t *deck_list) {
 		} else if (current_deck->next == NULL) {
 			current_deck->prev->next = NULL;
 		} else {
-			current_deck->prev->next = current_deck->next;
-			current_deck->next->prev = current_deck->prev;
+			if (current_deck->prev != NULL)
+				current_deck->prev->next = current_deck->next;
+			if (current_deck->next != NULL)
+				current_deck->next->prev = current_deck->prev;
 		}
+
+		if (deck_list->head == current_deck)
+			deck_list->head = current_deck->next;
+
 		free(current_deck);
 		printf("The card was successfully deleted from deck %d.\n", copy_index_deck);
 		return;

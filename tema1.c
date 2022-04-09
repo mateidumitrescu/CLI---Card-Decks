@@ -7,6 +7,7 @@
 
 #define C_MAX 128
 #define ARG 56
+#define S 256
 
 int main(void) {
 
@@ -49,6 +50,8 @@ int main(void) {
 		} else if (strcmp(command, "SORT_DECK") == 0) {
 			sort_deck(deck_list);	
 		} else {
+			char buffer[S];
+			fgets(buffer, S, stdin);
 			printf("Invalid command. Please try again.\n");
 		}
 	}
