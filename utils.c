@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "struct_magic.h"
 
@@ -119,6 +120,7 @@ void add_deck_in_list(dll_list_t *deck_list, void *data) {
 
 void start_add_deck(int data_size_card_list, dll_list_t *deck_list) {
 	int number_of_cards;
+	char number[ARG], symbol[ARG];
 	scanf("%d", &number_of_cards);
 	char buffer[ARG];
 	fgets(buffer, ARG, stdin);
@@ -130,17 +132,19 @@ void start_add_deck(int data_size_card_list, dll_list_t *deck_list) {
 	int count = 0;
 	dll_list_t *card_list = create_card_list(data_size_card_list);
 	while (count < number_of_cards) {
-		scanf("%d", &card_info->number);
-		scanf("%s", card_info->symbol);
 		fgets(buffer, ARG, stdin);
-		if (strlen(buffer) > 1) {
+		sscanf(buffer, "%s%s", number, symbol);
+		if (!isdigit(buffer[0])) {
 			count--;
-			printf("Invalid command. Please try again.\n");
-			//no incrementation so we could add number_of_cards cards in list
-		} else if (is_valid_card(card_info->number, card_info->symbol)) {
-			add_card_in_list(card_list, card_info);
+			printf("The provided card is not a valid one.\n");
 		} else {
-			count--;
+			card_info->number = atoi(number);
+			strcpy(card_info->symbol, symbol);
+			if (is_valid_card(card_info->number, card_info->symbol)) {
+				add_card_in_list(card_list, card_info);
+			} else {
+				count--;
+			}
 		}
 		count++;
 	}
@@ -401,24 +405,28 @@ void delete_card(dll_list_t *deck_list) {
 }
 
 void start_adding_cards(dll_list_t *card_list, int number_of_cards) {
-	int index = 0;
+	char number[ARG], symbol[ARG];
 	char buffer[ARG];
-	card_t *info = malloc(sizeof(*info));
-	while (index < number_of_cards) {
-		scanf("%d%s", &info->number, info->symbol);
+	card_t *card_info = malloc(sizeof(*card_info));
+	int count = 0;
+	while (count < number_of_cards) {
 		fgets(buffer, ARG, stdin);
-		if (strlen(buffer) > 1) {
-			index--;
-			printf("Invalid command. Please try again.\n");
-			//no incrementation so we could add number_of_cards cards in list
-		} else if (is_valid_card(info->number, info->symbol)) {
-			add_card_in_list(card_list, info);
+		sscanf(buffer, "%s%s", number, symbol);
+		if (!isdigit(buffer[0])) {
+			count--;
+			printf("The provided card is not a valid one.\n");
 		} else {
-			index--;
+			card_info->number = atoi(number);
+			strcpy(card_info->symbol, symbol);
+			if (is_valid_card(card_info->number, card_info->symbol)) {
+				add_card_in_list(card_list, card_info);
+			} else {
+				count--;
+			}
 		}
-		index++;
+		count++;
 	}
-	free(info);
+	free(card_info);
 }
 
 void add_cards(dll_list_t *deck_list) {
