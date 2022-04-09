@@ -11,6 +11,10 @@
 
 dll_list_t *create_deck_list(int data_size) {
 	dll_list_t *deck_list = malloc(sizeof(*deck_list));
+	if (!deck_list) {
+		fprintf(stderr, "Malloc failed\n");
+		return NULL;
+	}
 	deck_list->data_size = data_size;
 	deck_list->size = 0;
 	deck_list->head = NULL;
@@ -20,6 +24,10 @@ dll_list_t *create_deck_list(int data_size) {
 
 dll_list_t *create_card_list(int data_size) {
 	dll_list_t *card_list = malloc(sizeof(*card_list));
+	if (!card_list) {
+		fprintf(stderr, "Malloc failed\n");
+		return NULL;
+	}
 	card_list->data_size = data_size;
 	card_list->size = 0;
 	card_list->head = NULL;
@@ -67,7 +75,15 @@ int count_arguments(char arguments[ARG]) {
 
 void add_card_in_list(dll_list_t *card_list, void* data) {
 	dll_node_t *card = malloc(sizeof(*card));
+	if (!card) {
+		fprintf(stderr, "Malloc failed\n");
+		return;
+	}
 	card->data = malloc(card_list->data_size);
+	if (!card->data) {
+		fprintf(stderr, "Malloc failed\n");
+		return;
+	}
 	memcpy(card->data, data, card_list->data_size);
 
 	if (card_list->size == 0) {
@@ -93,7 +109,15 @@ void add_card_in_list(dll_list_t *card_list, void* data) {
 
 void add_deck_in_list(dll_list_t *deck_list, void *data) {
 	dll_node_t *deck = malloc(sizeof(*deck));
+	if (!deck) {
+		fprintf(stderr, "Malloc failed\n");
+		return;
+	}
 	deck->data = malloc(deck_list->data_size);
+	if (!deck->data) {
+		fprintf(stderr, "Malloc failed\n");
+		return;
+	}
 	memcpy(deck->data, data, deck_list->data_size);
 
 	if (deck_list->size == 0) {
@@ -128,6 +152,10 @@ void start_add_deck(int data_size_card_list, dll_list_t *deck_list) {
 		return;
 	}
 	card_t *card_info = malloc(sizeof(*card_info));
+	if (!card_info) {
+		fprintf(stderr, "Malloc failed\n");
+		return;
+	}
 	int count = 0;
 	dll_list_t *card_list = create_card_list(data_size_card_list);
 	while (count < number_of_cards) {
@@ -423,6 +451,10 @@ void start_adding_cards(dll_list_t *card_list, int number_of_cards) {
 	char number[ARG], symbol[ARG];
 	char buffer[ARG];
 	card_t *card_info = malloc(sizeof(*card_info));
+	if (!card_info) {
+		fprintf(stderr, "Malloc failed\n");
+		return;
+	}
 	int count = 0;
 	while (count < number_of_cards) {
 		fgets(buffer, ARG, stdin);
@@ -665,7 +697,15 @@ void merge_decks(dll_list_t *deck_list) {
 
 void insert_deck(dll_list_t *deck_list, dll_list_t *list, int index) {
 	dll_node_t *new_deck = malloc(sizeof(*new_deck));
+	if (!new_deck) {
+		fprintf(stderr, "Malloc failed\n");
+		return;
+	}
 	new_deck->data = malloc(deck_list->data_size);
+	if (!new_deck->data) {
+		fprintf(stderr, "Malloc failed\n");
+		return;
+	}
 	memcpy(new_deck->data, list, deck_list->data_size);
 
 	dll_node_t *current_deck = deck_list->head;
